@@ -1,0 +1,25 @@
+# Python
+*.py[cod]
+
+# Distribution
+dist/
+build/
+htmlcov/
+.eggs/
+
+# Testing
+coverage.xml
+.coverage
+.coverage.*
+.idea/
+.tox/
+junit-docs-ci.xml
+junit-py27.xml
+junit-py36.xml
+junit-py37.xml
+
+# Sphinx
+docs/_build
+
+# Mac
+.DS_Store
