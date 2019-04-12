@@ -97,7 +97,7 @@ class Instrument():
     def _get_parang(self,
                     time):
 
-        t = Time(str(time).decode('utf-8'),
+        t = Time(str(time),
                  location=EarthLocation(lon=self.m_instrument_lon,
                                         lat=self.m_instrument_lat))
 
@@ -182,6 +182,6 @@ class Instrument():
                         color="red",
                         zorder=5)
 
-        ax.legend(loc=0)
+        # ax.legend(loc=0)
 
         plt.show()
