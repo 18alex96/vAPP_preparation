@@ -27,8 +27,11 @@ class Instrument():
         elif self.m_instrument_name == "CHARIS":
             instrument_lon = -155.476667
             instrument_lat = 19.825556
+        elif self.m_instrument_name == "LBT":
+            instrument_lon = -109.889064
+            instrument_lat = 32.701308
         else:
-            raise ValueError("Instrument should be either \'MagAO\' or \'CHARIS\'")
+            raise ValueError("Instrument should be either \'MagAO\', \'CHARIS\', or \'LBT\'")
 
         return instrument_lon, instrument_lat
 
@@ -45,8 +48,12 @@ class Instrument():
             model_psf = model_psf[11,]
             psf_pos_1 = (62, 119)
             psf_pos_2 = (140, 84)
+        elif self.m_instrument_name == "LBT":
+            model_psf = model_psf
+            psf_pos_1 = (140, 232)
+            psf_pos_2 = (140, 48)
         else:
-            raise ValueError("Instrument should be either \'MagAO\' or \'CHARIS\'")
+            raise ValueError("Instrument should be either \'MagAO\', \'CHARIS\', or \'LBT\'")
 
         return model_psf, psf_pos_1, psf_pos_2
 
@@ -56,8 +63,10 @@ class Instrument():
             platescale = 0.016
         elif self.m_instrument_name == "CHARIS":
             platescale = 0.015
+        elif self.m_instrument_name == "LBT":
+            platescale = 0.0107
         else:
-            raise ValueError("Instrument should be either \'MagAO\' or \'CHARIS\'")
+            raise ValueError("Instrument should be either \'MagAO\', \'CHARIS\', or \'LBT\'")
 
         return platescale
 
@@ -66,30 +75,32 @@ class Instrument():
         if self.m_instrument_name == "MagAO":
             rot_off = 180. + 1.8
         elif self.m_instrument_name == "CHARIS":
-            rot_off = -113
+            rot_off = -113.
+        elif self.m_instrument_name == "LBT":
+            rot_off = 0.
         else:
-            raise ValueError("Instrument should be either \'MagAO\' or \'CHARIS\'")
+            raise ValueError("Instrument should be either \'MagAO\', \'CHARIS\', or \'LBT\'")
 
         return rot_off
 
     def add_target(self,
+                   target_name,
                    target_ra,
                    target_dec,
                    target_position_angle,
                    target_separation):
 
+        self.m_target_name = target_name
         self.m_target_ra = target_ra
         self.m_target_dec = target_dec
         self.m_target_position_angle = target_position_angle
         self.m_target_separation = target_separation
 
     def add_night(self,
-                  date,
                   time_start,
                   time_end,
                   steps=10):
 
-        self.m_date = date
         self.m_time_start = time_start
         self.m_time_end = time_end
         self.m_steps = steps
@@ -123,14 +134,14 @@ class Instrument():
     def plot_object_position(self):
 
         # get aperture angles for all times
-        date_start = "%sT%s" % (self.m_date, self.m_time_start)
-        date_end = "%sT%s" % (self.m_date, self.m_time_end)
-        step = int(np.round((Time(date_end) - Time(date_start)).value * 24 * 60 / self.m_steps))
+        step = int(np.round((Time(self.m_time_end) - Time(self.m_time_start)).value * 24 * 60 / self.m_steps))
 
-        dates = np.arange(start=date_start,
-                          stop=date_end,
+        dates = np.arange(start=self.m_time_start,
+                          stop=self.m_time_end,
                           step=step,
                           dtype="datetime64[m]")
+
+        print dates
 
         self.m_parangs = np.array([])
 
@@ -157,8 +168,12 @@ class Instrument():
 
         fig, ax = plt.subplots()
 
-        ax.imshow(np.log(self.m_model_psf),
-                  origin="lower")
+        if self.m_instrument_name == "LBT":
+            ax.imshow(np.sqrt(self.m_model_psf),
+                      origin="lower")
+        else:
+            ax.imshow(np.log(self.m_model_psf),
+                      origin="lower")
         aperture_1.plot(color="white")
         aperture_2.plot(color="white")
         plt.plot(aperture_positions_1[:, 0], aperture_positions_1[:, 1], "r.")
@@ -182,6 +197,11 @@ class Instrument():
                         color="red",
                         zorder=5)
 
-        # ax.legend(loc=0)
+            ax.plot([], [], label=str(i) + ": " + str(dates[i])[-5:], linestyle="", color="r")
+
+        ax.set_title("LBT, " + str(self.m_target_name) + ", " + str(dates[0])[:10])
+        leg = ax.legend(loc=0, frameon=True, labelspacing=1, title='Time [UT]', bbox_to_anchor=(1., 1.))
+        for text in leg.get_texts():
+            plt.setp(text, color='red')
 
         plt.show()
