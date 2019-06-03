@@ -141,7 +141,7 @@ class Instrument():
                           step=step,
                           dtype="datetime64[m]")
 
-        print dates
+        print(dates)
 
         self.m_parangs = np.array([])
 
@@ -199,7 +199,7 @@ class Instrument():
 
             ax.plot([], [], label=str(i) + ": " + str(dates[i])[-5:], linestyle="", color="r")
 
-        ax.set_title("LBT, " + str(self.m_target_name) + ", " + str(dates[0])[:10])
+        ax.set_title("%s, " % self.m_instrument_name + str(self.m_target_name) + ", " + str(dates[0])[:10])
         leg = ax.legend(loc=0, frameon=True, labelspacing=1, title='Time [UT]', bbox_to_anchor=(1., 1.))
         for text in leg.get_texts():
             plt.setp(text, color='red')
