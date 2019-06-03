@@ -1,17 +1,17 @@
 # testing the preparation tool
 from core import Instrument
 
-# # test case PZ Tel with MagAO
-# instrument = "MagAO"
-# target_name = "PZ Tel"
-# target_ra = 283.2745823348121
-# target_dec = -50.180895227015526
-# target_position_angle = 59.51
-# target_separation = .483
-# extra_rot = 25.
-# time_start = "2018-04-30T10:39:05"
-# time_end = "2018-04-30T10:49:52"
-# steps = 1
+# test case PZ Tel with MagAO
+instrument = "MagAO"
+target_name = "PZ Tel"
+target_ra = 283.2745823348121
+target_dec = -50.180895227015526
+target_position_angle = 59.51
+target_separation = .483
+extra_rot = 25.
+time_start = "2018-04-30T10:39:05"
+time_end = "2018-04-30T10:49:52"
+steps = 1
 
 # # test case Theta 1 Ori B with MagAO
 # instrument = "MagAO"
@@ -35,7 +35,7 @@ from core import Instrument
 # extra_rot = 0.
 # time_start = "2019-02-26T06:44:00.0"
 # time_end = "2019-02-26T07:32:00.0"
-# steps = 5
+# steps = 2
 #
 # # test case OMI AND  with CHARIS
 # instrument = "CHARIS"
@@ -48,18 +48,18 @@ from core import Instrument
 # time_start = "2018-06-25T13:45:40.869"
 # time_end = "2018-06-25T13:47:40.869"
 # steps = 1
-
-# test case HD87646
-instrument = "LBT"
-target_name = "HD87646"
-target_ra = 151.66954349925743
-target_dec = 17.894979480419554
-target_position_angle = 70
-target_separation = .400
-extra_rot = 0.
-time_start = "2019-04-18T23:00:00"
-time_end = "2019-04-19T04:01:00"
-steps = 5
+#
+# # test case HD87646
+# instrument = "LBT"
+# target_name = "HD87646"
+# target_ra = 151.66954349925743
+# target_dec = 17.894979480419554
+# target_position_angle = 70
+# target_separation = .400
+# extra_rot = 0.
+# time_start = "2019-04-18T23:00:00"
+# time_end = "2019-04-19T04:01:00"
+# steps = 5
 
 # # test case HD164509
 # instrument = "LBT"
@@ -69,10 +69,33 @@ steps = 5
 # target_position_angle = 202.5
 # target_separation = .700
 # extra_rot = 0.
-# time_start = "2019-04-19T05:00:00"
-# time_end = "2019-04-19T11:01:00"
+# time_start = "2019-05-17T07:40:00"
+# time_end = "2019-05-17T09:41:00"
 # steps = 6
 
+# # test case Kepler 21
+# instrument = "LBT"
+# target_name = "Kepler21"
+# target_ra = 287.36196731685897
+# target_dec = 38.71413838052882
+# target_position_angle = 129.74
+# target_separation = 0.7671
+# extra_rot = 0.
+# time_start = "2019-04-21T11:31:25"
+# time_end = "2019-04-21T12:20:00"
+# steps = 2
+
+# # test case HD206893
+# instrument = "LBT"
+# target_name = "HD206893"
+# target_ra = 326.34168735931195
+# target_dec = -12.783352171281424
+# target_position_angle = 65
+# target_separation = 0.257
+# extra_rot = 0.
+# time_start = "2019-05-17T10:40:00"
+# time_end = "2019-05-17T12:10:00"
+# steps = 5
 
 instrument = Instrument(instrument_name=instrument,
                         extra_rot=extra_rot)
