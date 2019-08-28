@@ -1,17 +1,17 @@
 # testing the preparation tool
 from core import Instrument
 
-# test case PZ Tel with MagAO
-instrument = "MagAO"
-target_name = "PZ Tel"
-target_ra = 283.2745823348121
-target_dec = -50.180895227015526
-target_position_angle = 59.51
-target_separation = .483
-extra_rot = 25.
-time_start = "2018-04-30T10:39:05"
-time_end = "2018-04-30T10:49:52"
-steps = 1
+# # test case PZ Tel with MagAO
+# instrument = "MagAO"
+# target_name = "PZ Tel"
+# target_ra = 283.2745823348121
+# target_dec = -50.180895227015526
+# target_position_angle = 59.51
+# target_separation = .483
+# extra_rot = 25.
+# time_start = "2018-04-30T10:39:05"
+# time_end = "2018-04-30T10:49:52"
+# steps = 1
 
 # # test case Theta 1 Ori B with MagAO
 # instrument = "MagAO"
@@ -81,33 +81,37 @@ steps = 1
 # target_position_angle = 129.74
 # target_separation = 0.7671
 # extra_rot = 0.
-# time_start = "2019-04-21T11:31:25"
-# time_end = "2019-04-21T12:20:00"
+# time_start = "2019-05-04T11:31:25"
+# time_end = "2019-05-04T12:20:00"
 # steps = 2
 
-# # test case HD206893
-# instrument = "LBT"
-# target_name = "HD206893"
-# target_ra = 326.34168735931195
-# target_dec = -12.783352171281424
-# target_position_angle = 65
-# target_separation = 0.257
-# extra_rot = 0.
-# time_start = "2019-05-17T10:40:00"
-# time_end = "2019-05-17T12:10:00"
-# steps = 5
+#
+# time_start_2 = "2019-04-28T11:31:25"
+# time_end_2 = "2019-04-28T12:20:00"
+
+# test case HD206893
+instrument = "CHARIS"
+target_name = "HD206893"
+target_ra = 326.34168735931195
+target_dec = -12.783352171281424
+target_position_angle = 65
+target_separation = 0.257
+extra_rot = 0.
+time_start = "2018-06-23T13:50:00"
+time_end = "2018-06-23T15:50:00"
+steps = 4
 
 instrument = Instrument(instrument_name=instrument,
                         extra_rot=extra_rot)
 
-instrument.add_target(target_name=target_name,
+instrument.set_target(target_name=target_name,
                       target_ra=target_ra,
                       target_dec=target_dec,
                       target_position_angle=target_position_angle,
                       target_separation=target_separation)
 
-instrument.add_night(time_start=time_start,
+instrument.set_night(time_start=time_start,
                      time_end=time_end,
                      steps=steps)
 
-instrument.plot_object_position()
+instrument.plot_object_position(time_format="LST")
