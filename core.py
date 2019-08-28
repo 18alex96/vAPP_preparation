@@ -83,7 +83,7 @@ class Instrument():
 
         return rot_off
 
-    def add_target(self,
+    def set_target(self,
                    target_name,
                    target_ra,
                    target_dec,
@@ -96,7 +96,7 @@ class Instrument():
         self.m_target_position_angle = target_position_angle
         self.m_target_separation = target_separation
 
-    def add_night(self,
+    def set_night(self,
                   time_start,
                   time_end,
                   steps=10):
@@ -129,9 +129,13 @@ class Instrument():
         p_angle = np.arctan2(np.sin(hour_angle_rad),
                              (np.cos(dec_rad) * np.tan(lat_rad) - np.sin(dec_rad) * np.cos(hour_angle_rad)))
 
-        return np.rad2deg(p_angle)
+        return np.rad2deg(p_angle), sid_time
 
-    def plot_object_position(self):
+    def plot_object_position(self,
+                             time_format="UTC"):
+
+        if time_format not in ["UTC", "LST"]:
+            raise ValueError("Time format should be either \'UTC\' or \'LST\'")
 
         # get aperture angles for all times
         step = int(np.round((Time(self.m_time_end) - Time(self.m_time_start)).value * 24 * 60 / self.m_steps))
@@ -144,10 +148,14 @@ class Instrument():
         print(dates)
 
         self.m_parangs = np.array([])
+        sid_times = np.array([])
 
         for date in dates:
+            tmp_parang, tmp_sid_time = self._get_parang(date)
             self.m_parangs = np.append(self.m_parangs,
-                                       self._get_parang(date))
+                                       tmp_parang)
+            sid_times = np.append(sid_times,
+                                  tmp_sid_time)
 
         # Apply telescope specific corrections and add position angle of source
         self.m_parangs = self.m_target_position_angle + self.m_rot_off - (self.m_extra_rot + self.m_parangs)
@@ -197,7 +205,12 @@ class Instrument():
                         color="red",
                         zorder=5)
 
-            ax.plot([], [], label=str(i) + ": " + str(dates[i])[-5:], linestyle="", color="r")
+            if time_format == "UTC":
+                ax.plot([], [], label=str(i) + ": " + str(dates[i])[-5:], linestyle="", color="r")
+            elif time_format == "LST":
+                sid_time_h = int(np.floor(sid_times[i]))
+                sid_time_m = int(np.floor((sid_times[i] - sid_time_h) * 60))
+                ax.plot([], [], label=f"{i}: {sid_time_h}:{sid_time_m:02}", linestyle="", color="r")
 
         ax.set_title("%s, " % self.m_instrument_name + str(self.m_target_name) + ", " + str(dates[0])[:10])
         leg = ax.legend(loc=0, frameon=True, labelspacing=1, title='Time [UT]', bbox_to_anchor=(1., 1.))
