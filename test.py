@@ -1,5 +1,8 @@
 # testing the preparation tool
-from core import Instrument
+from astropy.coordinates import SkyCoord, EarthLocation
+
+from core import Instrument, Target, Observation, vAPP
+from plotting import plot_observation
 
 # test case PZ Tel with MagAO
 instrument = "MagAO"
@@ -85,29 +88,65 @@ steps = 1
 # time_end = "2019-04-21T12:20:00"
 # steps = 2
 
-# # test case HD206893
-# instrument = "LBT"
-# target_name = "HD206893"
-# target_ra = 326.34168735931195
-# target_dec = -12.783352171281424
-# target_position_angle = 65
-# target_separation = 0.257
-# extra_rot = 0.
-# time_start = "2019-05-17T10:40:00"
-# time_end = "2019-05-17T12:10:00"
-# steps = 5
+# instrument = Instrument(instrument_name=instrument,
+#                         extra_rot=extra_rot)
+#
+# instrument.add_target(target_name=target_name,
+#                       target_ra=target_ra,
+#                       target_dec=target_dec,
+#                       target_position_angle=target_position_angle,
+#                       target_separation=target_separation)
+#
+# instrument.add_night(time_start=time_start,
+#                      time_end=time_end,
+#                      steps=steps)
+#
+# instrument.plot_object_position()
 
-instrument = Instrument(instrument_name=instrument,
-                        extra_rot=extra_rot)
+# test case HD206893
+instrument = "CHARIS"
+instrument_lon = -155.476667
+instrument_lat = 19.825556
+plate_scale = 0.015
+vAPPs = ["180"]
+rot_off = -113.
 
-instrument.add_target(target_name=target_name,
-                      target_ra=target_ra,
-                      target_dec=target_dec,
-                      target_position_angle=target_position_angle,
-                      target_separation=target_separation)
+target_name = "HD206893"
+target_ra = 326.34168735931195
+target_dec = -12.783352171281424
+target_position_angle = 65
+target_separation = 0.257
+extra_rot = 0.
+time_start = "2019-05-17T10:40:00"
+time_end = "2019-05-17T12:10:00"
+steps = 5
 
-instrument.add_night(time_start=time_start,
-                     time_end=time_end,
-                     steps=steps)
+target = Target(name=target_name,
+                sky_coords=SkyCoord(target_ra, target_dec, unit="deg"),
+                position_angle=target_position_angle,
+                separation=target_separation,
+                delta_mag=None)
 
-instrument.plot_object_position()
+instrument = Instrument(name=instrument,
+                        location=EarthLocation(lon=instrument_lon,
+                                               lat=instrument_lat),
+                        vAPPs=vAPPs,
+                        plate_scale=plate_scale,
+                        derotator_offset=rot_off)
+
+vAPP = vAPP(name="180",
+            pupil=None,
+            phase_pattern=None,
+            retardance=None,
+            wavelength_range=None,
+            pattern_rotation=None)
+
+observation = Observation(instrument=instrument,
+                          vAPP=vAPP,
+                          target=target,
+                          time=time_start,
+                          wavelength=None)
+
+print(observation.parallactic_angle)
+
+plot_observation(observation=observation)

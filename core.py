@@ -1,25 +1,47 @@
 import numpy as np
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
-from matplotlib import pyplot as plt
-from photutils import CircularAperture
 from scipy.ndimage import rotate
 
+
 class Target(object):
-    def __init__(self, name, sky_coords, position_angle, separation, delta_mag):
+    def __init__(self,
+                 name,
+                 sky_coords,
+                 position_angle,
+                 separation,
+                 delta_mag):
         self.name = name
-        #add rest
-    
-    @staticmethod`
-    def from_simbad(simbad_name, position_angle, separation, delta_mag):
+        self.sky_coords = sky_coords
+        self.position_anlge = position_angle
+        self.separation = separation
+        self.delta_mag = delta_mag
+
+    @staticmethod
+    def from_simbad(simbad_name,
+                    position_angle,
+                    separation,
+                    delta_mag):
+        sky_coords = 0.  # TODO add Simbad lookup
         return Target(simbad_name, sky_coords, position_angle, separation, delta_mag)
-    
+
     @staticmethod
     def from_library(name):
+        # TODO add library lookup
+        sky_coords = 0.
+        position_angle = 0.
+        separation = 0.
+        delta_mag = 0.
         return Target(name, sky_coords, position_angle, separation, delta_mag)
+
 
 class Observation(object):
     def __init__(self, instrument, vAPP, target, time, wavelength):
+        self.instrument = instrument
+        self.vAPP = vAPP
+        self.target = target
+        self.time = time
+        self.wavelength = wavelength
 
     @property
     def is_in_dark_zone(self):
@@ -28,46 +50,100 @@ class Observation(object):
     @property
     def elevation(self):
         pass
-    
+
     @property
     def parallactic_angle(self):
-        pass
-    
+        # Get sideral time in hours
+        sid_time = self.sidereal_time
+
+        # Convert to degrees
+        sid_time_deg = sid_time * 15.
+
+        # Calculate hour angle in degrees
+        hour_angle = sid_time_deg - self.target.sky_coords.ra.value
+
+        # conversion to radians:
+        hour_angle_rad = np.deg2rad(hour_angle)
+        dec_rad = np.deg2rad(self.target.sky_coords.dec.value)
+        lat_rad = np.deg2rad(self.instrument.location.lat.value)
+
+        p_angle = np.arctan2(np.sin(hour_angle_rad),
+                             (np.cos(dec_rad) * np.tan(lat_rad) - np.sin(dec_rad) * np.cos(hour_angle_rad)))
+
+        return np.rad2deg(p_angle)
+
     @property
     def sidereal_time(self):
-        pass
-    
+        t = Time(str(self.time),
+                 location=self.instrument.location)
+
+        return t.sidereal_time("apparent").value
+
     @property
     def azimuth(self):
         pass
-    
+
     @property
     def airmass(self):
         pass
-    
+
     def get_simulated_image(self):
         pass
 
+
 class Instrument(object):
-    def __init__(self, name, location=None, vAPPs=None, plate_scale=None, derotator_offset=0):
-        pass
-    
+    def __init__(self,
+                 name,
+                 location=None,
+                 vAPPs=None,
+                 plate_scale=None,
+                 derotator_offset=0,
+                 manual_offset=0):
+        self.name = name
+        self.location = location
+        self.vAPPs = vAPPs
+        self.plate_scale = plate_scale
+        self.derotator_offset = derotator_offset
+        self.manual_offset = manual_offset
+
     @staticmethod
     def from_library(self, name):
+        # TODO add library lookup
+        location = 0.
+        vAPP = 0.
+        plate_scale = 0.
+        derotator_offset = 0.
         return Instrument(name, location, vAPP, plate_scale, derotator_offset)
 
     def observe(self, target, vAPP_name, time, wavelength):
         return Observation(self, target, vAPP, time, wavelength)
 
+
 class vAPP(object):
-    def __init__(self, name, pupil, phase_pattern, retardance, wavelength_range, pattern_rotation=0):
-        pass
+    def __init__(self,
+                 name,
+                 pupil,
+                 phase_pattern,
+                 retardance,
+                 wavelength_range,
+                 pattern_rotation=0):
+        self.name = name
+        self.pupil = pupil
+        self.phase_pattern = phase_pattern
+        self.retardance = retardance
+        self.wavelength_range = wavelength_range
+        self.pattern_rotation = pattern_rotation
+
+        # TODO calcualte these positions? necessary for plot
+        self.psf_pos_1 = (62, 119)
+        self.psf_pos_2 = (140, 84)
 
     def is_in_dark_zone(self, coords):
         # do calculation
         pass
 
-class Instrument(object):
+
+class Instrument_old(object):
     def __init__(self,
                  instrument_name,
                  extra_rot=0.):
@@ -190,78 +266,3 @@ class Instrument(object):
                              (np.cos(dec_rad) * np.tan(lat_rad) - np.sin(dec_rad) * np.cos(hour_angle_rad)))
 
         return np.rad2deg(p_angle)
-
-    def plot_object_position(self):
-
-        # get aperture angles for all times
-        step = int(np.round((Time(self.m_time_end) - Time(self.m_time_start)).value * 24 * 60 / self.m_steps))
-
-        dates = np.arange(start=self.m_time_start,
-                          stop=self.m_time_end,
-                          step=step,
-                          dtype="datetime64[m]")
-
-        print(dates)
-
-        self.m_parangs = np.array([])
-
-        for date in dates:
-            self.m_parangs = np.append(self.m_parangs,
-                                       self._get_parang(date))
-
-        # Apply telescope specific corrections and add position angle of source
-        self.m_parangs = self.m_target_position_angle + self.m_rot_off - (self.m_extra_rot + self.m_parangs)
-
-        aperture_1 = CircularAperture(positions=self.m_psf_pos_1,
-                                      r=self.m_target_separation / self.m_platescale)
-
-        aperture_2 = CircularAperture(positions=self.m_psf_pos_2,
-                                      r=self.m_target_separation / self.m_platescale)
-
-        aperture_positions_1 = self.m_psf_pos_1 + self.m_target_separation / self.m_platescale * \
-                               np.array([-np.sin(np.deg2rad(self.m_parangs)),
-                                         np.cos(np.deg2rad(self.m_parangs))]).T
-
-        aperture_positions_2 = self.m_psf_pos_2 + self.m_target_separation / self.m_platescale * \
-                               np.array([-np.sin(np.deg2rad(self.m_parangs)),
-                                         np.cos(np.deg2rad(self.m_parangs))]).T
-
-        fig, ax = plt.subplots()
-
-        if self.m_instrument_name == "LBT":
-            ax.imshow(np.sqrt(self.m_model_psf),
-                      origin="lower")
-        else:
-            ax.imshow(np.log(self.m_model_psf),
-                      origin="lower")
-        aperture_1.plot(color="white")
-        aperture_2.plot(color="white")
-        plt.plot(aperture_positions_1[:, 0], aperture_positions_1[:, 1], "r.")
-        plt.plot(aperture_positions_2[:, 0], aperture_positions_2[:, 1], "r.")
-        for i, tmp_pos in enumerate(aperture_positions_1):
-            ax.annotate(i,
-                        xy=tmp_pos,
-                        xytext=(10 * -np.sin(np.deg2rad(self.m_parangs[i])),
-                                np.cos(np.deg2rad(self.m_parangs[i]))),
-                        textcoords='offset points',
-                        fontsize=8,
-                        color="red",
-                        zorder=5)
-
-            ax.annotate(i,
-                        xy=(aperture_positions_2[i, 0], aperture_positions_2[i, 1]),
-                        xytext=(10 * -np.sin(np.deg2rad(self.m_parangs[i])),
-                                np.cos(np.deg2rad(self.m_parangs[i]))),
-                        textcoords='offset points',
-                        fontsize=8,
-                        color="red",
-                        zorder=5)
-
-            ax.plot([], [], label=str(i) + ": " + str(dates[i])[-5:], linestyle="", color="r")
-
-        ax.set_title("%s, " % self.m_instrument_name + str(self.m_target_name) + ", " + str(dates[0])[:10])
-        leg = ax.legend(loc=0, frameon=True, labelspacing=1, title='Time [UT]', bbox_to_anchor=(1., 1.))
-        for text in leg.get_texts():
-            plt.setp(text, color='red')
-
-        plt.show()
