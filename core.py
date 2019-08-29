@@ -5,9 +5,69 @@ from matplotlib import pyplot as plt
 from photutils import CircularAperture
 from scipy.ndimage import rotate
 
+class Target(object):
+    def __init__(self, name, sky_coords, position_angle, separation, delta_mag):
+        self.name = name
+        #add rest
+    
+    @staticmethod`
+    def from_simbad(simbad_name, position_angle, separation, delta_mag):
+        return Target(simbad_name, sky_coords, position_angle, separation, delta_mag)
+    
+    @staticmethod
+    def from_library(name):
+        return Target(name, sky_coords, position_angle, separation, delta_mag)
 
-class Instrument():
+class Observation(object):
+    def __init__(self, instrument, vAPP, target, time, wavelength):
 
+    @property
+    def is_in_dark_zone(self):
+        pass
+
+    @property
+    def elevation(self):
+        pass
+    
+    @property
+    def parallactic_angle(self):
+        pass
+    
+    @property
+    def sidereal_time(self):
+        pass
+    
+    @property
+    def azimuth(self):
+        pass
+    
+    @property
+    def airmass(self):
+        pass
+    
+    def get_simulated_image(self):
+        pass
+
+class Instrument(object):
+    def __init__(self, name, location=None, vAPPs=None, plate_scale=None, derotator_offset=0):
+        pass
+    
+    @staticmethod
+    def from_library(self, name):
+        return Instrument(name, location, vAPP, plate_scale, derotator_offset)
+
+    def observe(self, target, vAPP_name, time, wavelength):
+        return Observation(self, target, vAPP, time, wavelength)
+
+class vAPP(object):
+    def __init__(self, name, pupil, phase_pattern, retardance, wavelength_range, pattern_rotation=0):
+        pass
+
+    def is_in_dark_zone(self, coords):
+        # do calculation
+        pass
+
+class Instrument(object):
     def __init__(self,
                  instrument_name,
                  extra_rot=0.):
