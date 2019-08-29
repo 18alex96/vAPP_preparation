@@ -45,7 +45,7 @@ class Instrument():
             psf_pos_1 = (110, 476)
             psf_pos_2 = (262, 160)
         elif self.m_instrument_name == "CHARIS":
-            model_psf = model_psf[11,]
+            model_psf = np.abs(model_psf[11,])
             psf_pos_1 = (62, 119)
             psf_pos_2 = (140, 84)
         elif self.m_instrument_name == "LBT":
@@ -213,7 +213,7 @@ class Instrument():
                 ax.plot([], [], label=f"{i}: {sid_time_h}:{sid_time_m:02}", linestyle="", color="r")
 
         ax.set_title("%s, " % self.m_instrument_name + str(self.m_target_name) + ", " + str(dates[0])[:10])
-        leg = ax.legend(loc=0, frameon=True, labelspacing=1, title='Time [UT]', bbox_to_anchor=(1., 1.))
+        leg = ax.legend(loc=0, frameon=True, labelspacing=1, title=f'Time [{time_format}]', bbox_to_anchor=(1., 1.))
         for text in leg.get_texts():
             plt.setp(text, color='red')
 

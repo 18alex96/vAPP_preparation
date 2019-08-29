@@ -89,6 +89,18 @@ from core import Instrument
 # time_start_2 = "2019-04-28T11:31:25"
 # time_end_2 = "2019-04-28T12:20:00"
 
+# # test case HD206893
+# instrument = "CHARIS"
+# target_name = "HD206893"
+# target_ra = 326.34168735931195
+# target_dec = -12.783352171281424
+# target_position_angle = 65
+# target_separation = 0.257
+# extra_rot = 0.
+# time_start = "2018-06-23T00:00:00"
+# time_end = "2018-06-24T00:00:00"
+# steps = 24
+
 # test case HD206893
 instrument = "CHARIS"
 target_name = "HD206893"
@@ -97,9 +109,9 @@ target_dec = -12.783352171281424
 target_position_angle = 65
 target_separation = 0.257
 extra_rot = 0.
-time_start = "2018-06-23T13:50:00"
-time_end = "2018-06-23T15:50:00"
-steps = 4
+time_start = "2020-07-01T09:13:00"
+time_end = "2020-07-01T14:43:00"
+steps = 5
 
 instrument = Instrument(instrument_name=instrument,
                         extra_rot=extra_rot)
