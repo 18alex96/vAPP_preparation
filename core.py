@@ -1,7 +1,9 @@
 import numpy as np
-from astropy.coordinates import EarthLocation
+from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
+import astropy.units as u
 from scipy.ndimage import rotate
+import asdf
 
 
 class Target(object):
@@ -22,17 +24,38 @@ class Target(object):
                     position_angle,
                     separation,
                     delta_mag):
-        sky_coords = 0.  # TODO add Simbad lookup
+        sky_coords = SkyCoord.from_name(simbad_name)
+
         return Target(simbad_name, sky_coords, position_angle, separation, delta_mag)
 
     @staticmethod
     def from_library(name):
         # TODO add library lookup
-        sky_coords = 0.
-        position_angle = 0.
-        separation = 0.
-        delta_mag = 0.
-        return Target(name, sky_coords, position_angle, separation, delta_mag)
+        try:
+            tree = asdf.open('targets/%s.asdf' % name.lower()).tree
+
+            target_name = tree['name']
+            sky_coords = SkyCoord(tree['sky_coords']['ra'], tree['sky_coords']['dec'], frame=tree['sky_coords']['frame'], unit='deg')
+            position_angle = tree['position_angle']
+            separation = tree['separation']
+            delta_mag = tree['delta_mag']
+            
+            return Target(target_name, sky_coords, position_angle, separation, delta_mag)
+        except Exception as e:
+            raise ValueError('Cannot find target with name %s in library.' % name)
+    
+    def write_to_library(self):
+        tree = {
+            'name': self.name,
+            'sky_coords': {
+                'frame': self.sky_coords.frame.name,
+                'ra': self.sky_coords.ra.to(u.deg).value,
+                'dec': self.sky_coords.dec.to(u.deg).value},
+            'position_angle': self.position_anlge,
+            'separation': self.separation,
+            'delta_mag': self.delta_mag}
+        
+        asdf.AsdfFile(tree).write_to('targets/%s.asdf' % self.name.lower())
 
 
 class Observation(object):
@@ -100,20 +123,43 @@ class Instrument(object):
                  derotator_offset=0,
                  manual_offset=0):
         self.name = name
-        self.location = location
+        try:
+            self.location = EarthLocation.of_site(location)
+        except:
+            self.location = location
         self.vAPPs = vAPPs
         self.plate_scale = plate_scale
         self.derotator_offset = derotator_offset
         self.manual_offset = manual_offset
-
+    
     @staticmethod
-    def from_library(self, name):
-        # TODO add library lookup
-        location = 0.
-        vAPP = 0.
-        plate_scale = 0.
-        derotator_offset = 0.
-        return Instrument(name, location, vAPP, plate_scale, derotator_offset)
+    def from_library(name):
+        try:
+            tree = asdf.open('instruments/%s.asdf' % name.lower())
+
+            instrument_name = tree['name']
+            location = EarthLocation(lon=tree['location']['lon'], lat=tree['location']['lat'])
+            vAPPs = tree['vAPPs']
+            plate_scale = tree['plate_scale']
+            derotator_offset = tree['derotator_offset']
+            manual_offset = tree['manual_offset']
+
+            return Instrument(instrument_name, location, vAPPs, plate_scale, derotator_offset, manual_offset)
+        except:
+            raise ValueError('Cannot find instrument %s in library.' % name)
+    
+    def write_to_library(self):
+        tree = {
+            'name': self.name,
+            'location': {
+                'lon': self.location.lon.to(u.deg).value,
+                'lat': self.location.lat.to(u.deg).value},
+            'vAPPs': self.vAPPs,
+            'plate_scale': self.plate_scale,
+            'derotator_offset': self.derotator_offset,
+            'manual_offset': self.manual_offset}
+        
+        asdf.AsdfFile(tree).write_to('instruments/%s.asdf' % self.name.lower())
 
     def observe(self, target, vAPP_name, time, wavelength):
         return Observation(self, target, vAPP, time, wavelength)
@@ -137,6 +183,17 @@ class vAPP(object):
         # TODO calcualte these positions? necessary for plot
         self.psf_pos_1 = (62, 119)
         self.psf_pos_2 = (140, 84)
+    
+    def write_to_library(self):
+        tree = {
+            'name': self.name,
+            'pupil': self.pupil,
+            'phase_pattern': self.phase_pattern,
+            'retardance': self.retardance,
+            'wavelength_range': self.wavelength_range,
+            'pattern_rotation': self.pattern_rotation}
+        
+        asdf.AsdfFile(tree).write_to('vapps/%s.asdf' % self.name)
 
     def is_in_dark_zone(self, coords):
         # do calculation
